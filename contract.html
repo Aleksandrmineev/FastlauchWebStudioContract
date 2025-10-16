@@ -241,7 +241,21 @@
       <section>
         <label>Текст договора</label>
         <div id="contract" class="contract-body contract-paper">
-          <h3 style="margin: 0 0 8px">ДОГОВОР НА СОЗДАНИЕ / ДОРАБОТКУ САЙТА</h3>
+          <h3 style="margin: 0 0 4px; text-align: center">
+            ДОГОВОР НА ОКАЗАНИЕ УСЛУГ
+          </h3>
+          <p
+            id="contractHeadMeta"
+            style="
+              text-align: center;
+              color: #444;
+              font-size: 14px;
+              margin: 0 0 12px;
+            "
+          >
+            № <span data-fill="contractNo">—</span> от
+            <span id="contractDate"></span>
+          </p>
 
           <p>
             г. <strong><span data-fill="vendorAddress">[Город]</span></strong
@@ -550,7 +564,7 @@
 
     <script>
       // ===== Настройки =====
-      const CONTRACT_VERSION = "1.0.0";
+      let CONTRACT_VERSION = "1.0.0";
       const GAS_URL =
         "https://script.google.com/macros/s/AKfycbzNNl7xpgUwd8XWyXmlUKnYHtnzcrQ3YVv4h-Q_Ojqh9-AJNw7XbPp6RgMmOWoGB8UlmA/exec";
 
@@ -704,7 +718,21 @@
           new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC";
         metaUI.ip.textContent = clientIP;
         metaUI.em.textContent = email.value || "—";
+
+        // === Добавляем обновление заголовка договора ===
+        const headNo = document.querySelector('[data-fill="contractNo"]');
+        if (headNo) headNo.textContent = contractNoEl.value || "—";
+
+        const headDate = document.getElementById("contractDate");
+        if (headDate) {
+          const d = new Date();
+          const day = String(d.getDate()).padStart(2, "0");
+          const month = String(d.getMonth() + 1).padStart(2, "0");
+          const year = d.getFullYear();
+          headDate.textContent = `${day}.${month}.${year}`;
+        }
       }
+
       contractNoEl.value = genContractNo();
       refreshMeta();
 
@@ -742,8 +770,8 @@
         ].forEach((k) => lockTo(k, p[k]));
 
         // версия договора (если передали)
-        if (typeof CONTRACT_VERSION !== "undefined") {
-          window.CONTRACT_VERSION = p.version || CONTRACT_VERSION;
+        if (typeof p.version !== "undefined" && p.version) {
+          CONTRACT_VERSION = p.version;
         }
 
         // Подставим ВСЕ подрядные поля в текст договора
@@ -809,9 +837,9 @@
           sig.style.marginTop = "12px";
           const img = pad.toDataURL("image/png");
           sig.innerHTML = `
-        <div style="font:16px/1.4 system-ui;margin-bottom:6px">Подпись Заказчика:</div>
-        <img src="${img}" style="width:420px;max-width:100%;border:1px solid #ccc;border-radius:6px">
-      `;
+              <div style="font:16px/1.4 system-ui;margin-bottom:6px">Подпись Заказчика:</div>
+              <img src="${img}" style="width:420px;max-width:100%;border:1px solid #ccc;border-radius:6px">
+            `;
           wrap.append(sig);
         }
 
@@ -820,14 +848,17 @@
           const vend = document.createElement("div");
           vend.style.marginTop = "8px";
           vend.innerHTML = `
-        <div style="font:16px/1.4 system-ui;margin:10px 0 6px">Подпись Исполнителя:</div>
-        <img src="${window.VENDOR_SIGN_URL}"
-             alt="Подпись Исполнителя"
-             style="width:260px;max-width:100%;border:1px solid #ccc;border-radius:6px;background:#fff" />
-        <div style="font:14px/1.4 system-ui;color:#444;margin-top:4px">
-          ${document.querySelector('[data-fill="vendor"]')?.textContent || ""}
-        </div>
-      `;
+              <div style="font:16px/1.4 system-ui;margin:10px 0 6px">Подпись Исполнителя:</div>
+              <img src="${window.VENDOR_SIGN_URL}"
+                   alt="Подпись Исполнителя"
+                   style="width:260px;max-width:100%;border:1px solid #ccc;border-radius:6px;background:#fff" />
+              <div style="font:14px/1.4 system-ui;color:#444;margin-top:4px">
+                ${
+                  document.querySelector('[data-fill="vendor"]')?.textContent ||
+                  ""
+                }
+              </div>
+            `;
           wrap.append(vend);
         }
 
