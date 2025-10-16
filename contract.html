@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Договор — Подписание и PDF</title>
+    <style>
+      :root {
+        --bg: #0b0f14;
+        --card: #121821;
+        --text: #e6eef7;
+        --muted: #a8b3c5;
+        --accent: #4da3ff;
+        --line: #1b2738;
+        --radius: 16px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 500 16px/1.45 system-ui;
+        padding: 16px;
+      }
+      .card {
+        max-width: 900px;
+        margin: auto;
+        background: var(--card);
+        border-radius: var(--radius);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        padding: 16px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        text-align: center;
+      }
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+      .grid.cols-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+      @media (max-width: 680px) {
+        .grid.cols-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      label {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #0f1520;
+        color: var(--text);
+        font: 500 16px/1.45 system-ui;
+      }
+      textarea {
+        min-height: 110px;
+        resize: vertical;
+      }
+      .contract-body {
+        background: #0f1520;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px;
+        max-height: 50vh;
+        overflow: auto;
+      }
+      .hr {
+        height: 1px;
+        background: var(--line);
+        margin: 12px 0;
+      }
+      .sig-wrap {
+        background: #0f1520;
+        border: 1px dashed var(--line);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      canvas {
+        width: 100%;
+        height: 220px;
+        background: #fff; /* было тёмным — теперь белый */
+        border-radius: 10px;
+        touch-action: none;
+        border: 1px solid #e5e7eb; /* тонкая светлая рамка, лучше видно */
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        appearance: none;
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+      .status {
+        font-size: 14px;
+        color: #cbd5e1;
+        margin-top: 6px;
+      }
+      .ok {
+        color: #35d07f;
+      }
+      .bad {
+        color: #ff8a8a;
+      }
+      small {
+        color: var(--muted);
+      }
+      .pill {
+        display: inline-block;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 2px 8px;
+        margin: 4px 6px 0 0;
+        font-size: 13px;
+        color: #cbd5e1;
+      }
+
+      /* Бумажный вид договора — не зависит от общих цветов сайта */
+      .contract-paper {
+        background: #ffffff !important;
+        color: #111827 !important; /* почти чёрный */
+        border-color: #e5e7eb !important;
+      }
+
+      /* заголовки и текст наследуют черный */
+      .contract-paper h1,
+      .contract-paper h2,
+      .contract-paper h3,
+      .contract-paper p,
+      .contract-paper li,
+      .contract-paper ol,
+      .contract-paper ul,
+      .contract-paper strong,
+      .contract-paper span {
+        color: inherit !important;
+      }
+
+      /* «пилюли» в подвале — светлые */
+      .contract-paper .pill {
+        background: #f9fafb;
+        border-color: #e5e7eb;
+        color: #374151;
+      }
+
+      /* код-блоки/ТЗ выглядят как заметка на белой странице */
+      .contract-paper [style*="background: rgba(255,255,255,0.05)"] {
+        background: #f7f7f8 !important;
+        color: inherit;
+        border: 1px solid #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Договор на оказание услуг</h1>
+      <p style="text-align: center; color: #a8b3c5; margin: 0 0 12px">
+        Заполните поля, поставьте галочку, нарисуйте подпись — можно скачать
+        PDF. Факт подписи сохраняется в локальный JSON-журнал.
+      </p>
+
+      <!-- Данные -->
+      <section class="grid cols-2">
+        <div>
+          <label>ФИО / Компания</label
+          ><input id="fullName" placeholder="Иван Иванов" autocomplete="name" />
+        </div>
+        <div>
+          <label>E-mail</label
+          ><input
+            id="email"
+            type="email"
+            placeholder="name@example.com"
+            inputmode="email"
+            autocomplete="email"
+          />
+        </div>
+        <div>
+          <label>Телефон</label
+          ><input
+            id="phone"
+            type="tel"
+            inputmode="tel"
+            placeholder="+43 …"
+            autocomplete="tel"
+          />
+        </div>
+        <div>
+          <label>Адрес</label
+          ><input
+            id="address"
+            placeholder="Улица, дом, город"
+            autocomplete="street-address"
+          />
+        </div>
+        <div>
+          <label>Название услуги</label
+          ><input id="service" placeholder="Разработка сайта" />
+        </div>
+        <div>
+          <label>Стоимость</label><input id="price" placeholder="800 €" />
+        </div>
+        <div>
+          <label>№ договора (генерируется)</label
+          ><input id="contractNo" readonly />
+        </div>
+      </section>
+
+      <div class="hr"></div>
+
+      <section>
+        <label>Текст договора</label>
+        <div id="contract" class="contract-body contract-paper">
+          <h3 style="margin: 0 0 8px">ДОГОВОР НА СОЗДАНИЕ / ДОРАБОТКУ САЙТА</h3>
+
+          <p>
+            г. <strong><span data-fill="vendorAddress">[Город]</span></strong
+            >,
+            <span id="dateAuto"
+              ><script>
+                document.write(new Date().toLocaleDateString("ru-RU"));
+              </script></span
+            >
+          </p>
+
+          <p>
+            <strong>Исполнитель:</strong>
+            <span data-fill="vendor">[Компания / Фрилансер]</span>, в лице
+            <span data-fill="vendorRep">[Представитель]</span>, действующий на
+            основании положений гражданского законодательства, с одной стороны,
+            и <strong>Заказчик:</strong>
+            <span data-fill="fullName">[ФИО / Компания]</span>, с другой
+            стороны, совместно именуемые «Стороны», заключили настоящий договор
+            о нижеследующем:
+          </p>
+
+          <ol>
+            <li>
+              <strong>Предмет договора</strong>
+              <p>
+                Исполнитель обязуется выполнить для Заказчика работы по:
+                <u
+                  ><span data-fill="service"
+                    >[созданию / доработке / сопровождению сайта]</span
+                  ></u
+                >, а Заказчик обязуется принять результат и оплатить его на
+                условиях настоящего договора.
+              </p>
+              <p>
+                Проект:
+                <strong
+                  ><span data-fill="projectName"
+                    >[Название проекта / домен]</span
+                  ></strong
+                >. Краткое описание:
+                <span data-fill="description">[описание]</span>.
+              </p>
+            </li>
+
+            <li>
+              <strong>Техническое задание</strong>
+              <p>
+                Работы выполняются в соответствии с техническим заданием,
+                согласованным Сторонами. Техническое задание (ТЗ) является
+                неотъемлемой частью настоящего договора и может быть изложено в
+                следующем виде:
+              </p>
+              <p
+                style="
+                  white-space: pre-wrap;
+                  background: rgba(255, 255, 255, 0.05);
+                  padding: 8px;
+                  border-radius: 8px;
+                "
+              >
+                <span data-fill="spec">[Подробное ТЗ / описание задач]</span>
+              </p>
+            </li>
+
+            <li>
+              <strong>Сроки выполнения работ</strong>
+              <p>
+                Общий срок выполнения проекта составляет:
+                <span data-fill="deadline">[срок]</span> с момента поступления
+                предоплаты. Изменение сроков допускается по взаимному
+                письменному согласованию сторон (включая электронную переписку).
+              </p>
+            </li>
+
+            <li>
+              <strong>Стоимость и порядок оплаты</strong>
+              <p>
+                Общая стоимость работ составляет:
+                <strong><span data-fill="price">[800 €]</span></strong
+                >.
+              </p>
+              <p>
+                Условия оплаты:
+                <span data-fill="paymentTerms"
+                  >[50% предоплата, 50% после сдачи]</span
+                >.
+              </p>
+              <p>
+                Оплата производится переводом на расчётный счёт, карту или иным
+                согласованным способом. Датой оплаты считается дата зачисления
+                средств Исполнителю.
+              </p>
+            </li>
+
+            <li>
+              <strong>Реквизиты для оплаты</strong>
+              <p data-optional-wrap>
+                <span
+                  data-fill="vendorReg"
+                  style="
+                    white-space: pre-wrap;
+                    background: rgba(255, 255, 255, 0.05);
+                    padding: 8px;
+                    border-radius: 8px;
+                  "
+                  >[Реквизиты Исполнителя: IBAN, BIC, карта,
+                  криптокошелёк]</span
+                >
+              </p>
+            </li>
+
+            <li>
+              <strong>Права и обязанности сторон</strong>
+              <p><u>Исполнитель обязуется:</u></p>
+              <ul>
+                <li>
+                  выполнить работы в сроки и объёме, предусмотренном договором;
+                </li>
+                <li>информировать Заказчика о ходе выполнения проекта;</li>
+                <li>
+                  согласовывать ключевые этапы и демонстрировать промежуточные
+                  результаты.
+                </li>
+              </ul>
+              <p><u>Заказчик обязуется:</u></p>
+              <ul>
+                <li>
+                  своевременно предоставлять материалы (тексты, изображения,
+                  доступы и др.);
+                </li>
+                <li>
+                  принимать результат работ в течение 3 рабочих дней с момента
+                  передачи;
+                </li>
+                <li>
+                  оплатить выполненные работы в порядке, установленном
+                  договором.
+                </li>
+              </ul>
+            </li>
+
+            <li>
+              <strong>Передача и приёмка результата</strong>
+              <p>
+                Результатом выполнения работ является готовый сайт или его
+                часть, размещённая на сервере Заказчика или Исполнителя.
+                Передача результата осуществляется электронным способом (по
+                ссылке или через архив файлов).
+              </p>
+              <p>
+                Что передаётся Заказчику:
+                <span data-fill="deliverables"
+                  >[исходники, доступы, инструкции]</span
+                >.
+              </p>
+              <p>
+                Если в течение 3 рабочих дней с момента получения результата
+                Заказчик не направит письменных возражений, работа считается
+                принятой в полном объёме.
+              </p>
+            </li>
+
+            <li>
+              <strong>Гарантии и сопровождение</strong>
+              <p>
+                Исполнитель гарантирует корректную работу выполненных функций в
+                течение
+                <span data-fill="support">[14 дней]</span> после приёмки. В
+                течение этого срока Исполнитель бесплатно исправляет ошибки,
+                возникшие по его вине. Дальнейшее сопровождение возможно по
+                отдельному соглашению.
+              </p>
+            </li>
+
+            <li>
+              <strong>Ответственность сторон и форс-мажор</strong>
+              <p>
+                За неисполнение или ненадлежащее исполнение обязательств стороны
+                несут ответственность в соответствии с гражданским
+                законодательством. Исполнитель не несёт ответственности за
+                задержки, вызванные несвоевременным предоставлением материалов
+                Заказчиком.
+              </p>
+              <p>
+                Стороны освобождаются от ответственности при наступлении
+                форс-мажорных обстоятельств (война, стихийные бедствия, перебои
+                в работе интернет-провайдеров и т.п.), при условии
+                своевременного уведомления другой стороны.
+              </p>
+            </li>
+
+            <li>
+              <strong>Заключительные положения</strong>
+              <p>
+                Настоящий договор вступает в силу с момента его подписания
+                сторонами (в том числе электронной подписью) и действует до
+                полного исполнения обязательств.
+              </p>
+              <p>
+                Версия договора: <span data-fill="version">[1.1.0]</span>.
+                Примечания:
+                <span data-fill="notes">[Дополнительные условия]</span>.
+              </p>
+            </li>
+          </ol>
+
+          <p
+            style="
+              margin-top: 12px;
+              border-top: 1px dashed var(--line);
+              padding-top: 8px;
+            "
+          >
+            <strong>Реквизиты сторон:</strong><br />
+            Исполнитель:
+            <span data-fill="vendor">[Компания]</span>,
+            <span data-fill="vendorAddress">[Адрес]</span>,
+            <span data-fill="vendorEmail">[Email]</span>
+            <span data-optional-wrap>
+              <br />Платёжные реквизиты:<br />
+              <span
+                data-fill="vendorReg"
+                data-optional
+                style="
+                  white-space: pre-wrap;
+                  background: rgba(255, 255, 255, 0.05);
+                  padding: 8px;
+                  border-radius: 8px;
+                "
+                >[Реквизиты]</span
+              >
+            </span>
+            <br /><br />
+            Заказчик:
+            <span data-fill="fullName">[ФИО]</span>,
+            <span data-fill="email">[Email]</span>
+            <span data-optional-wrap
+              >, адрес:
+              <span data-fill="address" data-optional>[адрес]</span></span
+            >
+          </p>
+
+          <!-- Метаданные в подвале -->
+          <div
+            id="metaFoot"
+            style="
+              margin-top: 8px;
+              border-top: 1px dashed var(--line);
+              padding-top: 8px;
+            "
+          >
+            <span class="pill">Версия: <span id="ver">—</span></span>
+            <span class="pill">№: <span id="no">—</span></span>
+            <span class="pill">Дата/время: <span id="dt">—</span></span>
+            <span class="pill">IP: <span id="ip">—</span></span>
+            <span class="pill">Email: <span id="em">—</span></span>
+          </div>
+        </div>
+      </section>
+
+      <div class="hr"></div>
+
+      <!-- Подпись -->
+      <section>
+        <label>Подпись заказчика (пальцем/стилусом)</label>
+        <div class="sig-wrap">
+          <canvas id="sig"></canvas>
+          <div class="row" style="justify-content: flex-start">
+            <button class="btn btn-ghost" id="clearSig" type="button">
+              Очистить подпись
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div class="hr"></div>
+
+      <!-- Согласие + статус -->
+      <section>
+        <label style="display: flex; gap: 10px; align-items: flex-start">
+          <input id="consent" type="checkbox" />
+          <span>Соглашаюсь с условиями и подтверждаю подпись.</span>
+        </label>
+        <div class="status" id="status"></div>
+      </section>
+
+      <!-- Кнопки -->
+      <div class="row" style="justify-content: flex-end; margin-top: 12px">
+        <button class="btn btn-ghost" id="dlLog" type="button">
+          Скачать JSON-журнал
+        </button>
+        <button class="btn btn-ghost" id="downloadBtn" type="button" disabled>
+          Скачать PDF
+        </button>
+        <button class="btn btn-primary" id="signBtn" type="button" disabled>
+          Подписать и сохранить
+        </button>
+      </div>
+    </main>
+
+    <!-- CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.2.0/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+
+    <script>
+      // ===== Настройки =====
+      const CONTRACT_VERSION = "1.0.0";
+      const GAS_URL =
+        "https://script.google.com/macros/s/AKfycbzNNl7xpgUwd8XWyXmlUKnYHtnzcrQ3YVv4h-Q_Ojqh9-AJNw7XbPp6RgMmOWoGB8UlmA/exec";
+
+      const EXTRA_FILLS = [
+        "vendor",
+        "vendorRep",
+        "vendorEmail",
+        "vendorAddress",
+        "vendorReg",
+        "projectName",
+        "description",
+        "spec",
+        "paymentTerms",
+        "deadline",
+        "support",
+        "deliverables",
+        "notes",
+        "version",
+      ];
+
+      // === ПРЕДЗАПОЛНЕНИЕ ИЗ ХЭША (данные подрядчика) ===
+      function parseHash() {
+        try {
+          if (!location.hash) return null;
+          const json = decodeURIComponent(escape(atob(location.hash.slice(1))));
+          return JSON.parse(json);
+        } catch {
+          return null;
+        }
+      }
+
+      // ===== Генерация номера договора =====
+      function genContractNo() {
+        const d = new Date(),
+          y = d.getFullYear(),
+          m = String(d.getMonth() + 1).padStart(2, "0"),
+          day = String(d.getDate()).padStart(2, "0");
+        const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
+        return `${y}${m}${day}-${rnd}`;
+      }
+
+      // ===== Элементы =====
+      const fullName = document.getElementById("fullName");
+      const email = document.getElementById("email");
+      const phone = document.getElementById("phone");
+      const address = document.getElementById("address");
+      const service = document.getElementById("service");
+      const terms = document.getElementById("terms");
+      const price = document.getElementById("price");
+      const contractNoEl = document.getElementById("contractNo");
+
+      const statusEl = document.getElementById("status");
+      const dlBtn = document.getElementById("downloadBtn");
+      const signBtn = document.getElementById("signBtn");
+      const dlLogBtn = document.getElementById("dlLog");
+      const consent = document.getElementById("consent");
+
+      // !!! Переименовано, чтобы не конфликтовать с метаданными для отправки
+      const metaUI = {
+        ver: document.getElementById("ver"),
+        no: document.getElementById("no"),
+        dt: document.getElementById("dt"),
+        ip: document.getElementById("ip"),
+        em: document.getElementById("em"),
+      };
+
+      // ===== Подпись (canvas) =====
+      const canvas = document.getElementById("sig");
+      const pad = new SignaturePad(canvas, {
+        minWidth: 0.8,
+        maxWidth: 2.5,
+        throttle: 12,
+        penColor: "#111",
+        backgroundColor: "#fff",
+      });
+      function resizeCanvas() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = 220 * ratio;
+        canvas.style.height = "220px";
+        canvas.getContext("2d").scale(ratio, ratio);
+        pad.clear();
+      }
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+      document
+        .getElementById("clearSig")
+        .addEventListener("click", () => pad.clear());
+
+      // ===== IP (best-effort) =====
+      let clientIP = "unknown";
+      fetch("https://api.ipify.org?format=json")
+        .then((r) => r.json())
+        .then((j) => {
+          clientIP = j.ip || "unknown";
+          refreshMeta();
+        })
+        .catch(() => {
+          clientIP = "unknown";
+          refreshMeta();
+        });
+
+      // ===== Синк значений в текст договора =====
+      function setFill(key, value, { placeholder = "—" } = {}) {
+        const v = (value ?? "").toString().trim();
+        document.querySelectorAll(`[data-fill="${key}"]`).forEach((el) => {
+          const wrap = el.closest("[data-optional-wrap]");
+          if (!v) {
+            // если опциональный блок — просто прячем обёртку, а не удаляем
+            if (el.hasAttribute("data-optional") && wrap) {
+              wrap.style.display = "none";
+              el.textContent = ""; // пусто, чтобы не рисовать плейсхолдер
+              return;
+            }
+            el.textContent = placeholder; // обычный плейсхолдер для не-опц. полей
+          } else {
+            if (wrap) wrap.style.display = ""; // вернуть видимость
+            el.textContent = v;
+          }
+        });
+      }
+
+      const fillIds = { fullName, email, phone, address, service, price };
+      function sync() {
+        // обновляем блоки по инпутам (как было)
+        for (const [key, el] of Object.entries(fillIds)) {
+          const val = el.value || "";
+          document
+            .querySelectorAll(`[data-fill="${key}"]`)
+            .forEach((n) => (n.textContent = val || `[${key}]`));
+        }
+
+        // отдельно обработаем опциональный адрес заказчика:
+        setFill("address", address.value, { placeholder: "" });
+
+        refreshMeta();
+        toggle();
+      }
+
+      Object.values(fillIds).forEach((el) =>
+        el.addEventListener("input", sync)
+      );
+      consent.addEventListener("change", toggle);
+      pad.addEventListener("endStroke", toggle);
+
+      // ===== Метаданные в подвале =====
+      function refreshMeta() {
+        metaUI.ver.textContent = CONTRACT_VERSION;
+        metaUI.no.textContent = contractNoEl.value || "—";
+        metaUI.dt.textContent =
+          new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC";
+        metaUI.ip.textContent = clientIP;
+        metaUI.em.textContent = email.value || "—";
+      }
+      contractNoEl.value = genContractNo();
+      refreshMeta();
+
+      // ===== Предзаполнение из prepare.html =====
+      (function applyPreset() {
+        const p = (function parseHash() {
+          try {
+            if (!location.hash) return null;
+            const json = decodeURIComponent(
+              escape(atob(location.hash.slice(1)))
+            );
+            return JSON.parse(json);
+          } catch {
+            return null;
+          }
+        })();
+        if (!p) return;
+
+        // если есть соответствующие inputs — заполним и залочим
+        const lockTo = (id, val) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = val || "";
+          el.readOnly = true;
+          el.setAttribute("aria-readonly", "true");
+        };
+        [
+          "service",
+          "price",
+          "paymentTerms",
+          "deadline",
+          "spec",
+          "description",
+          "projectName",
+        ].forEach((k) => lockTo(k, p[k]));
+
+        // версия договора (если передали)
+        if (typeof CONTRACT_VERSION !== "undefined") {
+          window.CONTRACT_VERSION = p.version || CONTRACT_VERSION;
+        }
+
+        // Подставим ВСЕ подрядные поля в текст договора
+        EXTRA_FILLS.forEach((k) => setFill(k, p[k]));
+
+        window.VENDOR_SIGN_URL = p.vendorSignUrl || "vendor-sign.png";
+
+        // И сразу обновим мету и статус
+        setTimeout(() => {
+          refreshMeta();
+          toggle();
+        }, 0);
+      })();
+
+      // ===== Проверка условий и статус =====
+      function toggle() {
+        const errs = [];
+        if (!fullName.value.trim()) errs.push("ФИО пусто");
+        if (!email.validity.valid || !email.value)
+          errs.push("E-mail невалиден/пуст");
+        if (!consent.checked) errs.push("Нет согласия");
+        if (pad.isEmpty()) errs.push("Нет подписи");
+
+        if (errs.length) {
+          statusEl.innerHTML = `<span class="bad">⚠ ${errs.join(" · ")}</span>`;
+          dlBtn.disabled = signBtn.disabled = true;
+        } else {
+          statusEl.innerHTML = `<span class="ok">✓ Готово к генерации PDF</span>`;
+          dlBtn.disabled = signBtn.disabled = false;
+        }
+      }
+      sync(); // первичный
+
+      // ===== PDF (локально) =====
+      async function makePdf() {
+        // 1) Обновим мету в DOM перед рендером
+        refreshMeta();
+
+        const { jsPDF } = window.jspdf;
+
+        // 2) Клонируем блок договора
+        const contractSrc = document.getElementById("contract");
+        const contractNode = contractSrc.cloneNode(true);
+
+        // 3) Уберём прокрутку/ограничения у КЛОНА, чтобы html2canvas видел всё
+        unlockScrollable(contractNode);
+
+        // 4) Проклеим актуальные значения меты в клон (версия/№/дата/IP/e-mail)
+        ["ver", "no", "dt", "ip", "em"].forEach((id) => {
+          const src = document.getElementById(id);
+          const dst = contractNode.querySelector("#" + id);
+          if (src && dst) dst.textContent = src.textContent;
+        });
+
+        // 5) Соберём wrap и добавим подписи до html2canvas
+        const wrap = document.createElement("div");
+        wrap.style.width = "900px"; // ширина полотна для равномерного рендера
+        wrap.append(contractNode);
+
+        // Подпись ЗАКАЗЧИКА (из canvas)
+        if (!pad.isEmpty()) {
+          const sig = document.createElement("div");
+          sig.style.marginTop = "12px";
+          const img = pad.toDataURL("image/png");
+          sig.innerHTML = `
+        <div style="font:16px/1.4 system-ui;margin-bottom:6px">Подпись Заказчика:</div>
+        <img src="${img}" style="width:420px;max-width:100%;border:1px solid #ccc;border-radius:6px">
+      `;
+          wrap.append(sig);
+        }
+
+        // Подпись ИСПОЛНИТЕЛЯ (из файла/URL, если задано)
+        if (window.VENDOR_SIGN_URL) {
+          const vend = document.createElement("div");
+          vend.style.marginTop = "8px";
+          vend.innerHTML = `
+        <div style="font:16px/1.4 system-ui;margin:10px 0 6px">Подпись Исполнителя:</div>
+        <img src="${window.VENDOR_SIGN_URL}"
+             alt="Подпись Исполнителя"
+             style="width:260px;max-width:100%;border:1px solid #ccc;border-radius:6px;background:#fff" />
+        <div style="font:14px/1.4 system-ui;color:#444;margin-top:4px">
+          ${document.querySelector('[data-fill="vendor"]')?.textContent || ""}
+        </div>
+      `;
+          wrap.append(vend);
+        }
+
+        // 6) Рендерим за пределами экрана
+        wrap.style.position = "fixed";
+        wrap.style.left = "-99999px";
+        document.body.appendChild(wrap);
+
+        const shot = await html2canvas(wrap, {
+          scale: 2,
+          backgroundColor: "#fff",
+        });
+
+        document.body.removeChild(wrap);
+
+        // 7) Многополосный PDF A4 с полями 20pt
+        const pdf = new jsPDF("p", "pt", "a4");
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const margin = 20;
+        const usableW = pageW - margin * 2;
+
+        // Сколько пикселей исходника помещается по высоте страницы при масштабировании по ширине:
+        const scaleRatio = usableW / shot.width;
+        const srcPxPerPage = (pageH - margin * 2) / scaleRatio;
+
+        let sY = 0;
+        let first = true;
+
+        while (sY < shot.height) {
+          const chunkH = Math.min(srcPxPerPage, shot.height - sY);
+
+          const pageCanvas = document.createElement("canvas");
+          pageCanvas.width = shot.width;
+          pageCanvas.height = Math.ceil(chunkH);
+
+          const ctx = pageCanvas.getContext("2d");
+          ctx.drawImage(
+            shot,
+            0,
+            sY, // src x,y
+            shot.width,
+            pageCanvas.height, // src w,h (кусок)
+            0,
+            0, // dst x,y
+            pageCanvas.width,
+            pageCanvas.height
+          );
+
+          const imgData = pageCanvas.toDataURL("image/png");
+          if (!first) pdf.addPage();
+          const drawH = pageCanvas.height * scaleRatio;
+          pdf.addImage(
+            imgData,
+            "PNG",
+            margin,
+            margin,
+            usableW,
+            drawH,
+            undefined,
+            "FAST"
+          );
+
+          sY += pageCanvas.height;
+          first = false;
+        }
+
+        const fname = `Dogovor_${
+          document.getElementById("contractNo").value
+        }.pdf`;
+        return { pdf, filename: fname };
+      }
+
+      function unlockScrollable(node) {
+        // Снимаем ограничения с самого контейнера договора
+        node.style.maxHeight = "none";
+        node.style.overflow = "visible";
+        node.style.height = "auto";
+
+        // На всякий случай — если внутри есть вложенные блоки с overflow
+        node.querySelectorAll("*").forEach((el) => {
+          const cs = getComputedStyle(el);
+          if (
+            cs.overflow !== "visible" &&
+            (cs.overflow === "auto" || cs.overflow === "scroll")
+          ) {
+            el.style.overflow = "visible";
+            el.style.maxHeight = "none";
+            el.style.height = "auto";
+          }
+        });
+      }
+
+      // ===== Локальный журнал =====
+      const LOG_KEY = "contractsLog";
+      const loadLog = () => {
+        try {
+          return JSON.parse(localStorage.getItem(LOG_KEY) || "[]");
+        } catch {
+          return [];
+        }
+      };
+      const saveLog = (arr) =>
+        localStorage.setItem(LOG_KEY, JSON.stringify(arr));
+      function downloadText(name, text) {
+        const blob = new Blob([text], {
+          type: "application/json;charset=utf-8",
+        });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+      }
+      dlLogBtn.addEventListener("click", () => {
+        downloadText(
+          `contracts_log_${new Date().toISOString().slice(0, 10)}.json`,
+          JSON.stringify(loadLog(), null, 2)
+        );
+      });
+
+      // ===== Отправка на GAS =====
+      async function sendToGAS(pdf, filename, meta) {
+        // Возвращает DataURL, отрезаем всё до первой запятой:
+        const dataUrl = pdf.output("datauristring"); // data:application/pdf;filename=...;base64,JVBERi...
+        const pdfBase64 = dataUrl.split(",").pop(); // -> только JVBERi...
+
+        const res = await fetch(GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, // simple request, без preflight
+          body: JSON.stringify({ filename, meta, pdfBase64 }),
+        });
+        return res.json();
+      }
+
+      // ===== Действия =====
+      document
+        .getElementById("downloadBtn")
+        .addEventListener("click", async () => {
+          const { pdf, filename } = await makePdf();
+          pdf.save(filename);
+        });
+
+      document.getElementById("signBtn").addEventListener("click", async () => {
+        // 1) Сохраняем запись локально
+        const entry = {
+          version: CONTRACT_VERSION,
+          contractNo: contractNoEl.value,
+          datetimeUTC: new Date().toISOString(),
+          ip: clientIP,
+          person: {
+            fullName: fullName.value,
+            email: email.value,
+            phone: phone.value,
+            address: address.value,
+          },
+          service: service.value,
+          price: price.value,
+          consent: consent.checked,
+        };
+        const log = loadLog();
+        log.push(entry);
+        saveLog(log);
+
+        // 2) Генерим PDF
+        const { pdf, filename } = await makePdf();
+
+        // 3) Посылаем копию на GAS (Drive + e-mail)
+        const meta = {
+          version: CONTRACT_VERSION,
+          contractNo: entry.contractNo,
+          datetimeUTC: entry.datetimeUTC,
+          ip: clientIP,
+          fullName: fullName.value,
+          email: email.value,
+          phone: phone.value,
+          address: address.value,
+          service: service.value,
+          price: price.value,
+        };
+        try {
+          const j = await sendToGAS(pdf, filename, meta);
+          console.log("GAS reply:", j);
+          if (!j.ok) console.warn("GAS error:", j.error);
+        } catch (e) {
+          console.warn("GAS send failed:", e);
+        }
+
+        // 4) Сохраняем PDF у клиента
+        pdf.save(filename);
+
+        // 5) Новый номер
+        contractNoEl.value = genContractNo();
+        refreshMeta();
+
+        // 6) (опц.) Web Share
+        try {
+          if (navigator.canShare && navigator.canShare()) {
+            const blob = new Blob([pdf.output("arraybuffer")], {
+              type: "application/pdf",
+            });
+            const file = new File([blob], filename, {
+              type: "application/pdf",
+            });
+            await navigator.share({
+              title: filename,
+              text: "Подписанный договор",
+              files: [file],
+            });
+          }
+        } catch {}
+
+        alert(
+          "Подписано: запись сохранена, PDF скачан. Копия отправлена на ваш Диск/почту (если GAS включен)."
+        );
+      });
+    </script>
+  </body>
+</html>

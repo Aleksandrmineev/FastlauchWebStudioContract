@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <title>Подготовка договора</title>
+    <style>
+      :root {
+        --bg: #0b0f14;
+        --card: #121821;
+        --text: #e6eef7;
+        --muted: #a8b3c5;
+        --accent: #4da3ff;
+        --line: #1b2738;
+        --radius: 16px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 500 16px/1.45 system-ui;
+        padding: 16px;
+      }
+      .card {
+        max-width: 940px;
+        margin: auto;
+        background: var(--card);
+        border-radius: var(--radius);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        padding: 16px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        text-align: center;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+      .cols-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+      @media (max-width: 860px) {
+        .cols-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      label {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #0f1520;
+        color: var(--text);
+        font: 500 16px/1.45 system-ui;
+      }
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        appearance: none;
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+      .out {
+        margin-top: 12px;
+        background: #0f1520;
+        border: 1px dashed var(--line);
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .linkbox {
+        user-select: all;
+        word-break: break-all;
+        line-height: 1.35;
+        cursor: pointer;
+      }
+      .pill {
+        display: inline-block;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 2px 8px;
+        margin: 0 6px 0 0;
+        color: #cbd5e1;
+        font-size: 13px;
+      }
+      .hint {
+        font-size: 13px;
+        color: #a8b3c5;
+      }
+      .section-title {
+        margin: 6px 0 2px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Подготовка договора (страница подрядчика)</h1>
+      <p class="muted" style="text-align: center; margin: 0 0 12px">
+        Заполните поля ниже — получите ссылку для клиента. Ссылка содержит
+        данные в хэше (<code>#...</code>) и работает локально.
+      </p>
+
+      <!-- ДАННЫЕ ПОДРЯДЧИКА -->
+      <div class="section-title">Данные исполнителя</div>
+      <section class="grid cols-2">
+        <div>
+          <label>Исполнитель (vendor)</label
+          ><input id="vendor" placeholder="FastLaunch Web Studio" />
+        </div>
+        <div>
+          <label>Представитель (vendorRep)</label
+          ><input id="vendorRep" placeholder="Александр Минеев" />
+        </div>
+        <div>
+          <label>Email (vendorEmail)</label
+          ><input
+            id="vendorEmail"
+            type="email"
+            placeholder="hello@fastlaunch.pro"
+          />
+        </div>
+        <div>
+          <label>Адрес / город (vendorAddress)</label
+          ><input id="vendorAddress" placeholder="Graz, Österreich" />
+        </div>
+        <div style="grid-column: 1/-1">
+          <label>Реквизиты (vendorReg) — опц.</label>
+          <textarea
+            id="vendorReg"
+            placeholder="IBAN: AT12 3456 7890 1234 5678
+          BIC: RZBAATWW
+          Карта: 4111 1111 1111 1111
+          USDT (TRC20): TNv..."
+          ></textarea>
+          <div class="hint">
+            Совет: пиши по строкам — IBAN, BIC, карта, криптокошелёк и т.п. Это
+            отобразится как аккуратный список в договоре.
+          </div>
+        </div>
+      </section>
+
+      <div class="section-title" style="margin-top: 12px">Проект</div>
+      <section class="grid cols-2">
+        <div>
+          <label>Название проекта / домен (projectName)</label
+          ><input id="projectName" placeholder="gardenrecovery.at" />
+        </div>
+        <div>
+          <label>Тип работ (service)</label
+          ><input
+            id="service"
+            placeholder="Создание / доработка / поддержка сайта"
+          />
+        </div>
+        <div>
+          <label>Описание (description) — кратко</label
+          ><input
+            id="description"
+            placeholder="Оптимизация скорости, адаптив, формы"
+          />
+        </div>
+        <div>
+          <label>Срок (deadline)</label
+          ><input id="deadline" placeholder="14 дней с предоплаты" />
+        </div>
+        <div>
+          <label>Стоимость (price)</label
+          ><input id="price" placeholder="800 €" />
+        </div>
+        <div>
+          <label>Условия оплаты (paymentTerms)</label
+          ><input
+            id="paymentTerms"
+            placeholder="50% предоплата, 50% после сдачи"
+          />
+        </div>
+        <div style="grid-column: 1/-1">
+          <label>Подробное ТЗ (spec)</label>
+          <textarea
+            id="spec"
+            placeholder="Страницы, блоки, интеграции, чек-лист правок…"
+          ></textarea>
+        </div>
+        <div>
+          <label>Сопровождение (support)</label
+          ><input id="support" placeholder="14 дней бесплатной поддержки" />
+        </div>
+        <div>
+          <label>Передаваемые материалы (deliverables)</label
+          ><input
+            id="deliverables"
+            placeholder="Исходники, доступ в WP, инструкции"
+          />
+        </div>
+        <div style="grid-column: 1/-1">
+          <label>Примечания (notes) — опц.</label>
+          <textarea
+            id="notes"
+            placeholder="Лицензии плагинов/шрифтов не входят; хостинг на стороне заказчика и т.п."
+          ></textarea>
+        </div>
+        <div>
+          <label>URL подписи Исполнителя (vendorSignUrl) — опц.</label>
+          <input id="vendorSignUrl" placeholder="vendor-sign.png" />
+        </div>
+        <div>
+          <label>Версия договора (version)</label
+          ><input id="version" value="1.1.0" />
+        </div>
+      </section>
+
+      <div class="row" style="justify-content: flex-end; margin-top: 12px">
+        <button class="btn btn-ghost" id="reset">Сбросить</button>
+        <button class="btn btn-primary" id="make">Сгенерировать ссылку</button>
+      </div>
+
+      <div class="out" id="result" hidden>
+        <div
+          class="row"
+          style="
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+          "
+        >
+          <div class="pill">Готово</div>
+          <div class="row">
+            <button class="btn btn-ghost" id="copyBtn" type="button">
+              📋 Скопировать ссылку
+            </button>
+            <button class="btn btn-primary" id="openBtn" type="button">
+              Открыть
+            </button>
+          </div>
+        </div>
+        <div
+          class="linkbox hint"
+          id="linkBox"
+          title="Кликни, чтобы скопировать"
+        ></div>
+        <div class="hint" style="margin-top: 6px">
+          Ссылка указывает на <code>contract.html</code> в этой же папке.
+          Отправьте её клиенту после публикации на GitHub Pages/хостинге.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ===== helpers =====
+      const $ = (id) => document.getElementById(id);
+      const fields = [
+        "vendor",
+        "vendorRep",
+        "vendorEmail",
+        "vendorAddress",
+        "vendorReg",
+        "projectName",
+        "service",
+        "description",
+        "spec",
+        "price",
+        "paymentTerms",
+        "deadline",
+        "support",
+        "deliverables",
+        "notes",
+        "version",
+      ];
+
+      // restore from localStorage
+      (function restore() {
+        try {
+          const raw = localStorage.getItem("prepareDraft");
+          if (!raw) return;
+          const data = JSON.parse(raw);
+          fields.forEach((k) => {
+            if (data[k] != null) $(k).value = data[k];
+          });
+        } catch {}
+      })();
+
+      // autosave draft
+      function saveDraft() {
+        const data = {};
+        fields.forEach((k) => (data[k] = $(k).value));
+        localStorage.setItem("prepareDraft", JSON.stringify(data));
+      }
+      fields.forEach((k) => $(k).addEventListener("input", saveDraft));
+
+      function encodeToHash(obj) {
+        const json = JSON.stringify(obj);
+        // base64 (UTF-8 safe)
+        return btoa(unescape(encodeURIComponent(json)));
+      }
+
+      function buildUrl() {
+        // base URL: contract.html рядом
+        let base;
+        if (location.protocol.startsWith("http")) {
+          // Live Server / хостинг
+          const u = new URL(location.href);
+          u.hash = "";
+          const path = u.pathname.replace(/[^\/]+$/, "contract.html"); // replace current filename
+          base = `${u.origin}${path}`;
+        } else {
+          // file://
+          // Попробуем заменить prepare.html на contract.html в пути
+          base = location.href.replace(
+            /prepare\.html(\?.*)?(#.*)?$/i,
+            "contract.html"
+          );
+        }
+
+        const data = {};
+        fields.forEach((k) => (data[k] = $(k).value.trim()));
+        return `${base}#${encodeToHash(data)}`;
+      }
+
+      async function copy(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch {
+          // fallback
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+          return true;
+        }
+      }
+
+      // actions
+      $("make").addEventListener("click", () => {
+        const url = buildUrl();
+        $("result").hidden = false;
+        $("linkBox").textContent = url;
+        // auto copy once
+        copy(url).catch(() => {});
+      });
+
+      $("copyBtn").addEventListener("click", async () => {
+        const url = $("linkBox").textContent.trim();
+        if (!url) return;
+        await copy(url);
+        $("copyBtn").textContent = "✅ Скопировано";
+        setTimeout(
+          () => ($("copyBtn").textContent = "📋 Скопировать ссылку"),
+          1500
+        );
+      });
+
+      $("linkBox").addEventListener("click", async () => {
+        const url = $("linkBox").textContent.trim();
+        if (!url) return;
+        await copy(url);
+        $("linkBox").classList.add("copied");
+        $("linkBox").title = "Скопировано";
+        setTimeout(() => {
+          $("linkBox").title = "Кликни, чтобы скопировать";
+        }, 1200);
+      });
+
+      $("openBtn").addEventListener("click", () => {
+        const url = $("linkBox").textContent.trim() || buildUrl();
+        window.open(url, "_blank");
+      });
+
+      $("reset").addEventListener("click", () => {
+        fields.forEach((k) => ($(k).value = ""));
+        saveDraft();
+        $("result").hidden = true;
+      });
+    </script>
+  </body>
+</html>
